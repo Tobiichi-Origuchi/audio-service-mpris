@@ -19,6 +19,7 @@ class AudioServiceMpris extends AudioServicePlatform {
   bool _isPlaying = false;
   bool _isRegistered = false;
   String? _serviceName;
+  AudioProcessingStateMessage _processingState = AudioProcessingStateMessage.idle;
 
   static void registerWith() {
     AudioServicePlatform.instance = AudioServiceMpris();
@@ -192,12 +193,12 @@ class AudioServiceMpris extends AudioServicePlatform {
 
     await _dBusClient.registerObject(_mpris);
     _serviceName = 'org.mpris.MediaPlayer2.${_defaults.dBusName}.instance$pid';
-    await _registerIfNeeded();
     _mpris.identity = _defaults.identity;
   }
 
   @override
   Future<void> setState(SetStateRequest request) async {
+    _processingState = request.state.processingState;
     await _registerIfNeeded();
     _mpris.position = request.state.updatePosition;
     _isPlaying = request.state.playing;
@@ -212,7 +213,6 @@ class AudioServiceMpris extends AudioServicePlatform {
 
   @override
   Future<void> setMediaItem(SetMediaItemRequest request) async {
-    await _registerIfNeeded();
     List<String>? artist;
     if (request.mediaItem.artist != null) artist = [request.mediaItem.artist!];
 
@@ -236,7 +236,11 @@ class AudioServiceMpris extends AudioServicePlatform {
   }
 
   Future<void> _registerIfNeeded() async {
-    if (_isRegistered || _serviceName == null) return;
+    if (_isRegistered ||
+        _serviceName == null ||
+        _processingState == AudioProcessingStateMessage.idle) {
+      return;
+    }
 
     await _dBusClient.requestName(_serviceName!, flags: {DBusRequestNameFlag.doNotQueue});
     _isRegistered = true;
