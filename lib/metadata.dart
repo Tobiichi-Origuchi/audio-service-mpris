@@ -3,7 +3,8 @@ part of 'audio_service_mpris.dart';
 /// https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata/
 class _Metadata {
   _Metadata(
-      {required this.title,
+      {this.trackId,
+      required this.title,
       this.length,
       this.artist,
       this.lyrics,
@@ -17,7 +18,7 @@ class _Metadata {
   /// mpris:trackid
   ///
   /// D-Bus path: A unique identity for this track within the context of an MPRIS object (eg: tracklist).
-  // final String trackId;
+  final String? trackId;
 
   /// xesam:title
   ///
@@ -104,6 +105,7 @@ class _Metadata {
 
   DBusValue toValue() {
     final result = DBusDict.stringVariant({
+      if (trackId != null) "mpris:trackid": DBusObjectPath(trackId!),
       "xesam:title": DBusString(title),
       if (length != null) "mpris:length": DBusInt64(length!.inMicroseconds),
       if (artist != null) "xesam:artist": DBusArray.string(artist!),
@@ -119,7 +121,8 @@ class _Metadata {
   }
 
   _Metadata copyWith(
-      {String? title,
+      {String? trackId,
+      String? title,
       Duration? length,
       List<String>? artist,
       String? lyrics,
@@ -130,6 +133,7 @@ class _Metadata {
       int? trackNumber,
       List<String>? genre}) {
     return _Metadata(
+      trackId: trackId ?? this.trackId,
       title: title ?? this.title,
       length: length ?? this.length,
       artist: artist ?? this.artist,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 
@@ -211,6 +212,15 @@ class AudioServiceMpris extends AudioServicePlatform {
     _mpris.rate = request.state.speed;
   }
 
+  String _trackIdPath(String id) {
+    final encoded = utf8
+        .encode(id)
+        .map((b) => b.toRadixString(16).padLeft(2, '0'))
+        .join();
+
+    return '/org/mpris/MediaPlayer2/TrackList/track_$encoded';
+  }
+
   @override
   Future<void> setMediaItem(SetMediaItemRequest request) async {
     List<String>? artist;
@@ -220,6 +230,7 @@ class AudioServiceMpris extends AudioServicePlatform {
     if (request.mediaItem.genre != null) genre = [request.mediaItem.genre!];
 
     _mpris.metadata = _Metadata(
+        trackId: _trackIdPath(request.mediaItem.id),
         title: request.mediaItem.title,
         length: request.mediaItem.duration,
         artist: artist,
