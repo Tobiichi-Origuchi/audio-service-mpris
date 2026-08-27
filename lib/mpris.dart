@@ -29,7 +29,8 @@ class _MprisMediaPlayer extends DBusObject {
   final _eventStreamController = StreamController<_MprisEvent>.broadcast();
   Stream<_MprisEvent> get events => _eventStreamController.stream;
 
-  final _methodEventStreamController = StreamController<_MprisMethod>.broadcast();
+  final _methodEventStreamController =
+      StreamController<_MprisMethod>.broadcast();
   Stream<_MprisMethod> get methodEvents => _methodEventStreamController.stream;
 
   _MprisMediaPlayer._() : super(DBusObjectPath('/org/mpris/MediaPlayer2'));
@@ -41,7 +42,8 @@ class _MprisMediaPlayer extends DBusObject {
 
   Stream<_PropertyEvent> get propertyEvents => _DBusProperty.events;
 
-  late final Map<String, _MethodHandler> _mediaPlayer2Handlers = Map.unmodifiable({
+  late final Map<String, _MethodHandler> _mediaPlayer2Handlers =
+      Map.unmodifiable({
     'Raise': _MethodHandler((_) => _doRaise()),
     'Quit': _MethodHandler((_) => _doQuit()),
   });
@@ -53,15 +55,18 @@ class _MprisMediaPlayer extends DBusObject {
     'PlayPause': _MethodHandler((_) => _doPlayPause()),
     'Stop': _MethodHandler((_) => _doStop()),
     'Play': _MethodHandler((_) => doPlay()),
-    'Seek': _MethodHandler((call) => _doSeek(call.values[0].asInt64()), signature: 'x'),
+    'Seek': _MethodHandler((call) => _doSeek(call.values[0].asInt64()),
+        signature: 'x'),
     'SetPosition': _MethodHandler(
-        (call) =>
-            _doSetPosition(call.values[0].asObjectPath().toString(), call.values[1].asInt64()),
+        (call) => _doSetPosition(
+            call.values[0].asObjectPath().toString(), call.values[1].asInt64()),
         signature: 'ox'),
-    'OpenUri': _MethodHandler((call) => _doOpenUri(call.values[0].asString()), signature: 's'),
+    'OpenUri': _MethodHandler((call) => _doOpenUri(call.values[0].asString()),
+        signature: 's'),
   });
 
-  late final Map<String, _DBusProperty> _mediaPlayer2Properties = Map.unmodifiable({
+  late final Map<String, _DBusProperty> _mediaPlayer2Properties =
+      Map.unmodifiable({
     'CanQuit': _canQuitProperty,
     'Fullscreen': _fullscreenProperty,
     'CanSetFullscreen': _canSetFullscreenProperty,
@@ -162,7 +167,8 @@ class _MprisMediaPlayer extends DBusObject {
   );
 
   List<String> get supportedUriSchemes => _supportedUriSchemesProperty.value;
-  set supportedUriSchemes(List<String> value) => _supportedUriSchemesProperty.value = value;
+  set supportedUriSchemes(List<String> value) =>
+      _supportedUriSchemesProperty.value = value;
 
   final _supportedMimeTypesProperty = _DBusProperty<List<String>>(
     name: 'SupportedMimeTypes',
@@ -171,7 +177,8 @@ class _MprisMediaPlayer extends DBusObject {
   );
 
   List<String> get supportedMimeTypes => _supportedMimeTypesProperty.value;
-  set supportedMimeTypes(List<String> value) => _supportedMimeTypesProperty.value = value;
+  set supportedMimeTypes(List<String> value) =>
+      _supportedMimeTypesProperty.value = value;
 
   final _playbackStatusProperty = _DBusProperty<String>(
     name: 'PlaybackStatus',
@@ -389,7 +396,10 @@ class _MprisMediaPlayer extends DBusObject {
   List<DBusIntrospectInterface> introspect() {
     return [
       DBusIntrospectInterface('org.mpris.MediaPlayer2',
-          methods: [DBusIntrospectMethod('Raise'), DBusIntrospectMethod('Quit')],
+          methods: [
+            DBusIntrospectMethod('Raise'),
+            DBusIntrospectMethod('Quit')
+          ],
           properties: [
             _canQuitProperty,
             _fullscreenProperty,
@@ -410,21 +420,28 @@ class _MprisMediaPlayer extends DBusObject {
             DBusIntrospectMethod('Stop'),
             DBusIntrospectMethod('Play'),
             DBusIntrospectMethod('Seek', args: [
-              DBusIntrospectArgument(DBusSignature('x'), DBusArgumentDirection.in_, name: 'Offset')
+              DBusIntrospectArgument(
+                  DBusSignature('x'), DBusArgumentDirection.in_,
+                  name: 'Offset')
             ]),
             DBusIntrospectMethod('SetPosition', args: [
-              DBusIntrospectArgument(DBusSignature('o'), DBusArgumentDirection.in_,
+              DBusIntrospectArgument(
+                  DBusSignature('o'), DBusArgumentDirection.in_,
                   name: 'TrackId'),
-              DBusIntrospectArgument(DBusSignature('x'), DBusArgumentDirection.in_,
+              DBusIntrospectArgument(
+                  DBusSignature('x'), DBusArgumentDirection.in_,
                   name: 'Position')
             ]),
             DBusIntrospectMethod('OpenUri', args: [
-              DBusIntrospectArgument(DBusSignature('s'), DBusArgumentDirection.in_, name: 'Uri')
+              DBusIntrospectArgument(
+                  DBusSignature('s'), DBusArgumentDirection.in_,
+                  name: 'Uri')
             ])
           ],
           signals: [
             DBusIntrospectSignal('Seeked', args: [
-              DBusIntrospectArgument(DBusSignature('x'), DBusArgumentDirection.out,
+              DBusIntrospectArgument(
+                  DBusSignature('x'), DBusArgumentDirection.out,
                   name: 'Position')
             ])
           ],
@@ -451,7 +468,9 @@ class _MprisMediaPlayer extends DBusObject {
   @override
   Future<DBusMethodResponse> handleMethodCall(DBusMethodCall methodCall) async {
     Future<DBusMethodResponse> guardSignature(
-        String signature, Future<DBusMethodResponse> Function(DBusMethodCall call) handler) async {
+        String signature,
+        Future<DBusMethodResponse> Function(DBusMethodCall call)
+            handler) async {
       if (methodCall.signature != DBusSignature(signature)) {
         return DBusMethodErrorResponse.invalidArgs();
       }
@@ -501,7 +520,8 @@ class _MprisMediaPlayer extends DBusObject {
   }
 
   @override
-  Future<DBusMethodResponse> setProperty(String interface, String name, DBusValue value) async {
+  Future<DBusMethodResponse> setProperty(
+      String interface, String name, DBusValue value) async {
     _log('Set property $name from $interface to $value');
 
     if (interface == 'org.mpris.MediaPlayer2') {

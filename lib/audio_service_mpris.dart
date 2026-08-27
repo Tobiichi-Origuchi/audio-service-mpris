@@ -20,7 +20,8 @@ class AudioServiceMpris extends AudioServicePlatform {
   bool _isPlaying = false;
   bool _isRegistered = false;
   String? _serviceName;
-  AudioProcessingStateMessage _processingState = AudioProcessingStateMessage.idle;
+  AudioProcessingStateMessage _processingState =
+      AudioProcessingStateMessage.idle;
 
   static void registerWith() {
     AudioServicePlatform.instance = AudioServiceMpris();
@@ -204,7 +205,8 @@ class AudioServiceMpris extends AudioServicePlatform {
     _mpris.position = request.state.updatePosition;
     _isPlaying = request.state.playing;
     _mpris.playbackState = _isPlaying ? 'Playing' : 'Paused';
-    _mpris.shuffle = request.state.shuffleMode != AudioServiceShuffleModeMessage.none;
+    _mpris.shuffle =
+        request.state.shuffleMode != AudioServiceShuffleModeMessage.none;
     _mpris.loopStatus = _loopStatuses.keys.firstWhere(
       (k) => _loopStatuses[k] == request.state.repeatMode,
       orElse: () => 'None',
@@ -213,10 +215,8 @@ class AudioServiceMpris extends AudioServicePlatform {
   }
 
   String _trackIdPath(String id) {
-    final encoded = utf8
-        .encode(id)
-        .map((b) => b.toRadixString(16).padLeft(2, '0'))
-        .join();
+    final encoded =
+        utf8.encode(id).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
 
     return '/org/mpris/MediaPlayer2/TrackList/track_$encoded';
   }
@@ -253,7 +253,8 @@ class AudioServiceMpris extends AudioServicePlatform {
       return;
     }
 
-    await _dBusClient.requestName(_serviceName!, flags: {DBusRequestNameFlag.doNotQueue});
+    await _dBusClient
+        .requestName(_serviceName!, flags: {DBusRequestNameFlag.doNotQueue});
     _isRegistered = true;
   }
 
@@ -295,9 +296,11 @@ class AudioServiceMpris extends AudioServicePlatform {
         case _MprisEventType.controlStop:
           _handlerCallbacks!.stop(const StopRequest());
         case _MprisEventType.position:
-          _handlerCallbacks!.seek(SeekRequest(position: event.value as Duration));
+          _handlerCallbacks!
+              .seek(SeekRequest(position: event.value as Duration));
         case _MprisEventType.openUri:
-          _handlerCallbacks!.playFromUri(PlayFromUriRequest(uri: event.value as Uri));
+          _handlerCallbacks!
+              .playFromUri(PlayFromUriRequest(uri: event.value as Uri));
       }
     });
   }
@@ -309,8 +312,9 @@ class AudioServiceMpris extends AudioServicePlatform {
       switch (event.name) {
         case 'Shuffle':
           final value = event.value as bool;
-          final modeMessage =
-              value ? AudioServiceShuffleModeMessage.all : AudioServiceShuffleModeMessage.none;
+          final modeMessage = value
+              ? AudioServiceShuffleModeMessage.all
+              : AudioServiceShuffleModeMessage.none;
           final request = SetShuffleModeRequest(shuffleMode: modeMessage);
           _handlerCallbacks!.setShuffleMode(request);
         case 'Rate':
@@ -319,7 +323,8 @@ class AudioServiceMpris extends AudioServicePlatform {
           _handlerCallbacks!.setSpeed(request);
         case 'LoopStatus':
           final value = event.value as String;
-          final repeatMode = _loopStatuses[value] ?? AudioServiceRepeatModeMessage.none;
+          final repeatMode =
+              _loopStatuses[value] ?? AudioServiceRepeatModeMessage.none;
           final request = SetRepeatModeRequest(repeatMode: repeatMode);
           _handlerCallbacks!.setRepeatMode(request);
         case 'PlaybackStatus':
@@ -333,7 +338,8 @@ class AudioServiceMpris extends AudioServicePlatform {
           }
         case 'Volume':
           final value = event.value as double;
-          final req = CustomActionRequest(name: 'dbusVolume', extras: {'value': value});
+          final req =
+              CustomActionRequest(name: 'dbusVolume', extras: {'value': value});
           _handlerCallbacks!.customAction(req);
       }
     });
@@ -345,7 +351,9 @@ class AudioServiceMpris extends AudioServicePlatform {
         case _MprisMethod.quit:
           if (_defaults.onQuitRequest != null) _defaults.onQuitRequest!.call();
         case _MprisMethod.raise:
-          if (_defaults.onRaiseRequest != null) _defaults.onRaiseRequest!.call();
+          if (_defaults.onRaiseRequest != null) {
+            _defaults.onRaiseRequest!.call();
+          }
       }
     });
   }

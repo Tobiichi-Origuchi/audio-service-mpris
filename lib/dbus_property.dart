@@ -14,7 +14,8 @@ class _DBusProperty<T extends Object> {
   T _value;
 
   static final DBusObject _mpris = _MprisMediaPlayer();
-  static final _eventStreamController = StreamController<_PropertyEvent>.broadcast();
+  static final _eventStreamController =
+      StreamController<_PropertyEvent>.broadcast();
   static Stream<_PropertyEvent> get events => _eventStreamController.stream;
 
   _DBusProperty({
@@ -29,7 +30,8 @@ class _DBusProperty<T extends Object> {
     if (_value == newValue) return;
 
     _value = newValue;
-    _mpris.emitPropertiesChanged(interfaceName, changedProperties: {name: _toDbusValue(newValue)});
+    _mpris.emitPropertiesChanged(interfaceName,
+        changedProperties: {name: _toDbusValue(newValue)});
   }
 
   DBusMethodResponse setFromDbus(DBusValue value) {
@@ -42,7 +44,8 @@ class _DBusProperty<T extends Object> {
     }
 
     _value = _fromDbusValue(value) as T;
-    _mpris.emitPropertiesChanged(interfaceName, changedProperties: {name: value});
+    _mpris
+        .emitPropertiesChanged(interfaceName, changedProperties: {name: value});
     _eventStreamController.add(_PropertyEvent(name, _value));
 
     return DBusMethodSuccessResponse([]);
@@ -70,17 +73,22 @@ DBusValue _toDbusValue(Object value) {
   } else if (value is Duration) {
     return DBusInt64(value.inMicroseconds);
   } else if (value is List<String>) {
-    return DBusArray(DBusSignature('s'), value.map((e) => DBusString(e)).toList());
+    return DBusArray(
+        DBusSignature('s'), value.map((e) => DBusString(e)).toList());
   } else if (value is List<int>) {
-    return DBusArray(DBusSignature('i'), value.map((e) => DBusInt64(e)).toList());
+    return DBusArray(
+        DBusSignature('i'), value.map((e) => DBusInt64(e)).toList());
   } else if (value is List<double>) {
-    return DBusArray(DBusSignature('d'), value.map((e) => DBusDouble(e)).toList());
+    return DBusArray(
+        DBusSignature('d'), value.map((e) => DBusDouble(e)).toList());
   } else if (value is List<bool>) {
-    return DBusArray(DBusSignature('b'), value.map((e) => DBusBoolean(e)).toList());
+    return DBusArray(
+        DBusSignature('b'), value.map((e) => DBusBoolean(e)).toList());
   } else if (value is _Metadata) {
     return value.toValue();
   } else {
-    throw ArgumentError('Unsupported type for D-Bus value: ${value.runtimeType}');
+    throw ArgumentError(
+        'Unsupported type for D-Bus value: ${value.runtimeType}');
   }
 }
 
@@ -130,6 +138,7 @@ String _getSignature<T>() {
   } else if (T == _Metadata) {
     return 'a{sv}';
   } else {
-    throw ArgumentError('Unsupported type for D-Bus signature: ${T.toString()}');
+    throw ArgumentError(
+        'Unsupported type for D-Bus signature: ${T.toString()}');
   }
 }

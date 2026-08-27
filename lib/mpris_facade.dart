@@ -65,12 +65,14 @@ class Mpris {
   ///
   /// Note that URI schemes should be lower-case.
   List<String> get supportedUriSchemes => _mpris.supportedUriSchemes;
-  set supportedUriSchemes(List<String> value) => _mpris.supportedUriSchemes = value;
+  set supportedUriSchemes(List<String> value) =>
+      _mpris.supportedUriSchemes = value;
 
   /// The mime-types supported by the media player.
   /// Mime-types should be in the standard format (e.g.: audio/mpeg or application/ogg).
   List<String> get supportedMimeTypes => _mpris.supportedMimeTypes;
-  set supportedMimeTypes(List<String> value) => _mpris.supportedMimeTypes = value;
+  set supportedMimeTypes(List<String> value) =>
+      _mpris.supportedMimeTypes = value;
 
   // ==================== org.mpris.MediaPlayer2.Player Properties ====================
 
@@ -110,7 +112,8 @@ class Mpris {
   ///
   /// If [canControl] is false, this property should also be false.
   bool get canGoPrevious => _mpris.canGoPrevious;
-  set canGoPrevious(bool value) => _mpris.canGoPrevious = _mpris.canControl && value;
+  set canGoPrevious(bool value) =>
+      _mpris.canGoPrevious = _mpris.canControl && value;
 
   /// Whether playback can be started using Play or PlayPause.
   ///

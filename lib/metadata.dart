@@ -112,7 +112,8 @@ class _Metadata {
       if (lyrics != null) "xesam:asText": DBusString(lyrics!),
       if (artUrl != null) "mpris:artUrl": DBusString(artUrl!),
       if (album != null) "xesam:album": DBusString(album!),
-      if (albumArtist != null) "xesam:albumArtist": DBusArray.string(albumArtist!),
+      if (albumArtist != null)
+        "xesam:albumArtist": DBusArray.string(albumArtist!),
       if (discNumber != null) "xesam:discNumber": DBusInt64(discNumber!),
       if (trackNumber != null) "xesam:trackNumber": DBusInt64(trackNumber!),
       if (genre != null) "xesam:genre": DBusArray.string(genre!),
