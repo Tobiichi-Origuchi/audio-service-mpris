@@ -137,6 +137,12 @@ class Mpris {
   bool get canPause => _mpris.canPause;
   set canPause(bool value) => _mpris.canPause = _mpris.canControl && value;
 
+  /// Whether playback can be controlled using Seek and SetPosition.
+  ///
+  /// If [canControl] is false, this property should also be false.
+  bool get canSeek => _mpris.canSeek;
+  set canSeek(bool value) => _mpris.canSeek = _mpris.canControl && value;
+
   /// Whether the media player may be controlled over this interface.
   ///
   /// This property is not expected to change, as it describes an intrinsic
