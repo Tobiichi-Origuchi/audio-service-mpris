@@ -14,6 +14,7 @@ class _Defaults {
   final bool canGoPrevious;
   final bool canPlay;
   final bool canPause;
+  final bool canSeek;
   final bool canControl;
   final void Function()? onQuitRequest;
   final void Function()? onRaiseRequest;
@@ -32,6 +33,7 @@ class _Defaults {
     this.canGoPrevious = false,
     this.canPlay = false,
     this.canPause = false,
+    this.canSeek = false,
     this.canControl = false,
     this.onQuitRequest,
     this.onRaiseRequest,

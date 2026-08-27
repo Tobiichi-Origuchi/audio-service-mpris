@@ -285,7 +285,7 @@ class _MprisMediaPlayer extends DBusObject {
   final _canSeekProperty = _DBusProperty<bool>(
     name: 'CanSeek',
     interfaceName: 'org.mpris.MediaPlayer2.Player',
-    initialValue: false,
+    initialValue: AudioServiceMpris._defaults.canSeek,
   );
 
   bool get canSeek => _canSeekProperty.value;
@@ -376,14 +376,41 @@ class _MprisMediaPlayer extends DBusObject {
   }
 
   /// Implementation of org.mpris.MediaPlayer2.Player.Seek()
-  Future<DBusMethodResponse> _doSeek(int offset) async {
+  Future<DBusMethodResponse> _doSeek(int offsetUs) async {
+    if (!canSeek || offsetUs == 0) return DBusMethodSuccessResponse([]);
+    final target = position + Duration(microseconds: offsetUs);
+    if (target < Duration.zero) {
+      await _seekTo(Duration.zero);
+    } else if (metadata.length != null && target > metadata.length!) {
+      _emitEvent(_MprisEventType.controlNext);
+    } else {
+      await _seekTo(target);
+    }
     return DBusMethodSuccessResponse([]);
   }
 
   /// Implementation of org.mpris.MediaPlayer2.Player.SetPosition()
-  Future<DBusMethodResponse> _doSetPosition(String trackId, int position) async {
-    _emitEvent(_MprisEventType.position, Duration(microseconds: position));
+  Future<DBusMethodResponse> _doSetPosition(
+      String trackId, int positionUs) async {
+    if (!canSeek || metadata.trackId == null || trackId != metadata.trackId) {
+      return DBusMethodSuccessResponse([]);
+    }
+    if (Duration(microseconds: positionUs) < Duration.zero ||
+        (metadata.length != null &&
+            Duration(microseconds: positionUs) > metadata.length!)) {
+      return DBusMethodSuccessResponse([]);
+    }
+    await _seekTo(Duration(microseconds: positionUs));
     return DBusMethodSuccessResponse([]);
+  }
+
+  Future<void> _seekTo(Duration target) async {
+    _emitEvent(_MprisEventType.position, target);
+    await emitSignal(
+      'org.mpris.MediaPlayer2.Player',
+      'Seeked',
+      [DBusInt64(target.inMicroseconds)],
+    );
   }
 
   /// Implementation of org.mpris.MediaPlayer2.Player.OpenUri()

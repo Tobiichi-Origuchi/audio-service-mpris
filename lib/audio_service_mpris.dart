@@ -52,10 +52,11 @@ class AudioServiceMpris extends AudioServicePlatform {
   /// These properties inform MPRIS clients about the capabilities of your media player.
   ///
   /// - [canControl]: Whether the media player can be controlled via MPRIS (default: `false`).
-  ///   **Important:** If `false`, all other capability flags (`canPlay`, `canPause`, `canGoNext`,
+  ///   **Important:** If `false`, all other capability flags (`canPlay`, `canPause`, `canSeek`, `canGoNext`,
   ///   `canGoPrevious`) will be forced to `false` regardless of their values.
   /// - [canPlay]: Whether playback can be started (default: `false`). Requires `canControl: true`.
   /// - [canPause]: Whether playback can be paused (default: `false`). Requires `canControl: true`.
+  /// - [canSeek]: Whether playback can be controlled using Seek and SetPosition (default: `false`). Requires `canControl: true`.
   /// - [canGoNext]: Whether the Next method is supported (default: `false`). Requires `canControl: true`.
   /// - [canGoPrevious]: Whether the Previous method is supported (default: `false`). Requires `canControl: true`.
   /// - [fullscreen]: Whether the media player is in fullscreen mode (default: `false`).
@@ -157,6 +158,7 @@ class AudioServiceMpris extends AudioServicePlatform {
     bool canGoPrevious = false,
     bool canPlay = false,
     bool canPause = false,
+    bool canSeek = true,
     bool canControl = false,
     void Function()? onQuitRequest,
     void Function()? onRaiseRequest,
@@ -176,6 +178,7 @@ class AudioServiceMpris extends AudioServicePlatform {
       canGoPrevious: canControl && canGoPrevious,
       canPlay: canControl && canPlay,
       canPause: canControl && canPause,
+      canSeek: canControl && canSeek,
       canControl: canControl,
       onQuitRequest: onQuitRequest,
       onRaiseRequest: onRaiseRequest,
