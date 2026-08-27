@@ -59,7 +59,7 @@ class _MprisMediaPlayer extends DBusObject {
         signature: 'x'),
     'SetPosition': _MethodHandler(
         (call) => _doSetPosition(
-            call.values[0].asObjectPath().toString(), call.values[1].asInt64()),
+            call.values[0].asObjectPath().value, call.values[1].asInt64()),
         signature: 'ox'),
     'OpenUri': _MethodHandler((call) => _doOpenUri(call.values[0].asString()),
         signature: 's'),
