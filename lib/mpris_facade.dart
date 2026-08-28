@@ -143,6 +143,10 @@ class Mpris {
   bool get canSeek => _mpris.canSeek;
   set canSeek(bool value) => _mpris.canSeek = _mpris.canControl && value;
 
+  /// The current volume level (0.0 to 1.0).
+  double get volume => _mpris.volume;
+  set volume(double value) => _mpris.volume = value;
+
   /// Whether the media player may be controlled over this interface.
   ///
   /// This property is not expected to change, as it describes an intrinsic

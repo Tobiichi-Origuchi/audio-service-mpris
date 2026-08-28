@@ -156,7 +156,7 @@ class _MprisMediaPlayer extends DBusObject {
   final _desktopEntryProperty = _DBusProperty<String>(
     name: 'DesktopEntry',
     interfaceName: 'org.mpris.MediaPlayer2',
-    initialValue: '',
+    initialValue: AudioServiceMpris._defaults.desktopEntry,
   );
 
   String get desktopEntry => _desktopEntryProperty.value;
