@@ -23,6 +23,13 @@ class AudioServiceMpris extends AudioServicePlatform {
   AudioProcessingStateMessage _processingState =
       AudioProcessingStateMessage.idle;
 
+  static const _pausedSeekEpsilon = Duration(milliseconds: 500);
+  static const _seekJumpThreshold = Duration(seconds: 2);
+  Duration? _seekBaselinePosition;
+  DateTime? _seekBaselineTime;
+  double _seekBaselineSpeed = 1.0;
+  bool _seekBaselinePlaying = false;
+
   static void registerWith() {
     AudioServicePlatform.instance = AudioServiceMpris();
   }
@@ -205,6 +212,7 @@ class AudioServiceMpris extends AudioServicePlatform {
   Future<void> setState(SetStateRequest request) async {
     _processingState = request.state.processingState;
     await _registerIfNeeded();
+    await _detectSeekJump(request.state);
     _mpris.position = request.state.updatePosition;
     _isPlaying = request.state.playing;
     _mpris.playbackState = _isPlaying ? 'Playing' : 'Paused';
@@ -217,6 +225,69 @@ class AudioServiceMpris extends AudioServicePlatform {
     _mpris.rate = request.state.speed;
   }
 
+  Future<void> _detectSeekJump(PlaybackStateMessage state) async {
+    if (!_mpris.canSeek) {
+      _clearSeekBaseline();
+      return;
+    }
+    final newPosition = state.updatePosition;
+    final newTime = state.updateTime;
+    final baselinePosition = _seekBaselinePosition;
+    if (baselinePosition == null) {
+      _updateSeekBaseline(newPosition, newTime, state.speed, state.playing);
+      return;
+    }
+
+    final bool seeked;
+    if (!state.playing) {
+      if (_seekBaselinePlaying) {
+        seeked = false;
+      } else {
+        seeked = (newPosition - baselinePosition).abs() > _pausedSeekEpsilon;
+      }
+    } else if (!_seekBaselinePlaying) {
+      seeked = false;
+    } else {
+      final elapsed = newTime.difference(_seekBaselineTime!);
+      final expected = baselinePosition + elapsed * _seekBaselineSpeed;
+      seeked = (newPosition - expected).abs() > _seekJumpThreshold;
+    }
+
+    if (seeked) {
+      if (_mpris._lastEmittedSeekedPosition != newPosition) {
+        _mpris._lastEmittedSeekedPosition = newPosition;
+        await _mpris.emitSignal(
+          'org.mpris.MediaPlayer2.Player',
+          'Seeked',
+          [DBusInt64(newPosition.inMicroseconds)],
+        );
+      }
+    } else {
+      _mpris._lastEmittedSeekedPosition = null;
+    }
+    _updateSeekBaseline(newPosition, newTime, state.speed, state.playing);
+  }
+
+  void _updateSeekBaseline(
+    Duration position,
+    DateTime time,
+    double speed,
+    bool playing,
+  ) {
+    _seekBaselinePosition = position;
+    _seekBaselineTime = time;
+    _seekBaselineSpeed = speed;
+    _seekBaselinePlaying = playing;
+  }
+
+  void _clearSeekBaseline() {
+    _seekBaselinePosition = null;
+    _seekBaselineTime = null;
+    _seekBaselineSpeed = 1.0;
+    _seekBaselinePlaying = false;
+    _mpris._lastEmittedSeekedPosition = null;
+  }
+
   String _trackIdPath(String id) {
     final encoded =
         utf8.encode(id).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
@@ -226,6 +297,7 @@ class AudioServiceMpris extends AudioServicePlatform {
 
   @override
   Future<void> setMediaItem(SetMediaItemRequest request) async {
+    _clearSeekBaseline();
     List<String>? artist;
     if (request.mediaItem.artist != null) artist = [request.mediaItem.artist!];
 
@@ -244,6 +316,7 @@ class AudioServiceMpris extends AudioServicePlatform {
 
   @override
   Future<void> stopService(StopServiceRequest request) async {
+    _clearSeekBaseline();
     _mpris.playbackState = 'Stopped';
     _mpris.metadata = _Metadata(title: 'No title');
     await _unregisterIfNeeded();

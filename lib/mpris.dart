@@ -42,6 +42,8 @@ class _MprisMediaPlayer extends DBusObject {
 
   Stream<_PropertyEvent> get propertyEvents => _DBusProperty.events;
 
+  Duration? _lastEmittedSeekedPosition;
+
   late final Map<String, _MethodHandler> _mediaPlayer2Handlers =
       Map.unmodifiable({
     'Raise': _MethodHandler((_) => _doRaise()),
@@ -231,7 +233,7 @@ class _MprisMediaPlayer extends DBusObject {
   final _minimumRateProperty = _DBusProperty<double>(
     name: 'MinimumRate',
     interfaceName: 'org.mpris.MediaPlayer2.Player',
-    initialValue: 1.0,
+    initialValue: AudioServiceMpris._defaults.minimumRate,
   );
 
   double get minimumRate => _minimumRateProperty.value;
@@ -240,7 +242,7 @@ class _MprisMediaPlayer extends DBusObject {
   final _maximumRateProperty = _DBusProperty<double>(
     name: 'MaximumRate',
     interfaceName: 'org.mpris.MediaPlayer2.Player',
-    initialValue: 1.0,
+    initialValue: AudioServiceMpris._defaults.maximumRate,
   );
 
   double get maximumRate => _maximumRateProperty.value;
@@ -314,6 +316,7 @@ class _MprisMediaPlayer extends DBusObject {
     name: 'Position',
     interfaceName: 'org.mpris.MediaPlayer2.Player',
     initialValue: Duration.zero,
+    emitChanged: false,
   );
 
   Duration get position => _positionProperty.value;
@@ -406,6 +409,7 @@ class _MprisMediaPlayer extends DBusObject {
 
   Future<void> _seekTo(Duration target) async {
     _emitEvent(_MprisEventType.position, target);
+    _lastEmittedSeekedPosition = target;
     await emitSignal(
       'org.mpris.MediaPlayer2.Player',
       'Seeked',

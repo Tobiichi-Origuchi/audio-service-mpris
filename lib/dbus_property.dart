@@ -11,6 +11,7 @@ class _DBusProperty<T extends Object> {
   final String interfaceName;
   final DBusSignature signature = DBusSignature(_getSignature<T>());
   final bool readOnly;
+  final bool emitChanged;
   T _value;
 
   static final DBusObject _mpris = _MprisMediaPlayer();
@@ -23,6 +24,7 @@ class _DBusProperty<T extends Object> {
     required this.interfaceName,
     required T initialValue,
     this.readOnly = true,
+    this.emitChanged = true,
   }) : _value = initialValue;
 
   T get value => _value;
@@ -30,8 +32,10 @@ class _DBusProperty<T extends Object> {
     if (_value == newValue) return;
 
     _value = newValue;
-    _mpris.emitPropertiesChanged(interfaceName,
-        changedProperties: {name: _toDbusValue(newValue)});
+    if (emitChanged) {
+      _mpris.emitPropertiesChanged(interfaceName,
+          changedProperties: {name: _toDbusValue(newValue)});
+    }
   }
 
   DBusMethodResponse setFromDbus(DBusValue value) {
