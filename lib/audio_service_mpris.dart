@@ -215,7 +215,11 @@ class AudioServiceMpris extends AudioServicePlatform {
     await _detectSeekJump(request.state);
     _mpris.position = request.state.updatePosition;
     _isPlaying = request.state.playing;
-    _mpris.playbackState = _isPlaying ? 'Playing' : 'Paused';
+    _mpris.playbackState = _isPlaying
+        ? 'Playing'
+        : (_processingState == AudioProcessingStateMessage.completed
+            ? 'Stopped'
+            : 'Paused');
     _mpris.shuffle =
         request.state.shuffleMode != AudioServiceShuffleModeMessage.none;
     _mpris.loopStatus = _loopStatuses.keys.firstWhere(
